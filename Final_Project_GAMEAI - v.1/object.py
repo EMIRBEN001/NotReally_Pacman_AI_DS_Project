@@ -122,13 +122,10 @@ class Pellet(pygame.sprite.Sprite):
 
 class Ground(pygame.sprite.Sprite):
     def __init__(self, game, x, y):
-        self.game = game
-        self.groups = game.all_sprites, game.pellets
-        pygame.sprite.Sprite.__init__(self, self.groups)
+        super().__init__()  # Not adding to any sprite group here
+        self.image = pygame.Surface((TILESIZE, TILESIZE))
+        self.image.fill(WHITE)  # Color for the ground
+        self.rect = self.image.get_rect(topleft=(x * TILESIZE, y * TILESIZE))
 
-        self.image = pygame.Surface((TILESIZE // 2, TILESIZE // 2))
-        self.image.fill(BLACK)  # White pellets
-        self.rect = self.image.get_rect()
-        self.x = x * TILESIZE + TILESIZE // 4
-        self.y = y * TILESIZE + TILESIZE // 4
-        self.rect.topleft = (self.x, self.y)
+    def update(self):
+        pass  # No update needed for ground tiles

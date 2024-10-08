@@ -31,6 +31,12 @@ def count_total_pellets():
 def init_game():
     global player, pellet_count
 
+    # Clear previous sprite groups to avoid overlap on retry
+    all_sprites.empty()
+    enemies.empty()
+    blocks.empty()
+    pellets.empty()
+
     pellet_count = count_total_pellets()  # Get the total pellet count
     print(f"Total pellets: {pellet_count}")  # Print total for verification
 
@@ -49,6 +55,71 @@ def init_game():
             elif tile == ' ':
                 Ground(game, col_index, row_index)  # Ground
 
+    # Add sprites to the all_sprites group for drawing and updating
+    all_sprites.add(player)
+    all_sprites.add(enemies)
+    all_sprites.add(blocks)
+    all_sprites.add(pellets)
+
+
+def draw_text(text, font, color, surface, x, y):
+    """Helper function to draw text on screen."""
+    text_obj = font.render(text, True, color)
+    text_rect = text_obj.get_rect(center=(x, y))
+    surface.blit(text_obj, text_rect)
+
+# Intro Screen
+def intro_screen():
+    font = pygame.font.Font(None, 74)
+    while True:
+        screen.fill(BLACK)
+        draw_text("PAC-MAN", font, YELLOW, screen, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50)
+        draw_text("Press ENTER to Start", font, WHITE, screen, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:
+                    return  # Exit the intro screen and start the game
+
+        pygame.display.flip()
+        clock.tick(60)
+
+# Game Over Screen
+def game_over_screen():
+    font = pygame.font.Font(None, 74)
+    button_font = pygame.font.Font(None, 50)
+
+    # Define the retry button rectangle
+    retry_button = pygame.Rect(SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 + 100, 200, 50)
+
+    while True:
+        screen.fill(BLACK)
+        draw_text("GAME OVER", font, RED, screen, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50)
+        pygame.draw.rect(screen, WHITE, retry_button)  # Draw the retry button
+        draw_text("Retry", button_font, BLACK, screen, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 125)
+
+        # Check events for quitting or button clicks
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+            # Check for mouse button click
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:  # Left mouse button clicked
+                    if retry_button.collidepoint(event.pos):
+                        return 'retry' # Exit the game over screen and retry
+
+            # Allow retry using keyboard "Enter" key
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:
+                    return 'retry' # Restart the game when "Enter" is pressed
+
+        pygame.display.flip()
+        clock.tick(60)
 
 # Main game loop
 def game_loop():
@@ -76,10 +147,6 @@ def game_loop():
             if keys[pygame.K_DOWN]:
                 player.move(0, 1)  # Move down by one tile
 
-        # Teleportation logic
-        tile_x = player.rect.x // TILESIZE
-        tile_y = player.rect.y // TILESIZE
-
         # Update sprites
         all_sprites.update()
 
@@ -96,22 +163,28 @@ def game_loop():
         # Check if all pellets have been collected
         if pellet_count <= 0:
             print("You collected all the pellets! You win!")
-            pygame.quit()
-            sys.exit()
+            result = game_over_screen()
+            draw_text("GAME OVER", font, RED, screen, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50)
+            if result == 'retry':
+                return True  # Indicate to retry the game loop
+            else:
+                return False  # Exit the game loop
 
         # Check for collisions between player and enemies
         if pygame.sprite.spritecollideany(player, enemies):
             # Handle Pac-Man being caught by a ghost
             print("Caught by a ghost!")
-            pygame.quit()
-            sys.exit()
+            result = game_over_screen()
+            if result == 'retry':
+                return True  # Indicate to retry the game loop
+            else:
+                return False  # Exit the game loop
 
         # Update display
         pygame.display.flip()
 
         # Cap the frame rate
         clock.tick(FPS)
-
 
 
 # Start the game loop
@@ -121,4 +194,11 @@ if __name__ == '__main__':
     game.enemies = enemies
     game.blocks = blocks
     game.pellets = pellets
-    game_loop()
+    game.tilemap = tilemap
+    intro_screen()
+    # Main game loop with retry logic
+    while True:
+        result = game_loop()  # Run the main game loop
+        if not result:
+            pygame.quit()
+            sys.exit()  # Exit the game if the player doesn't want to retry

@@ -14,7 +14,7 @@ BLACK = (0, 0, 0)
 BLUE = (0, 0, 255)
 
 #Tilemap
-TILESIZE = 40  # Tile size for the map
+TILESIZE = 30  # Tile size for the map
 
 tilemap = [
     "WWWWWWWWWWWWWWWWWWWWW",
@@ -24,11 +24,11 @@ tilemap = [
     "W.WW.W.WWWWWWW.W.WW.W",
     "W....W....W....W....W",
     "WWWW.WWW..W..WWW.WWWW",
-    "WWWW.W.........W.WWWW",
-    "WWWW.W.WWW WWW.W.WWWW",
-    "T......W EEE W......T",
-    "WWWW.W.WWWWWWW.W.WWWW",
-    "WWWW.W....P....W.WWWW",
+    "WWWW.W         W.WWWW",
+    "WWWW.W WWW WWW W.WWWW",
+    "TP.... WEE EEW .... T",
+    "WWWW.W WWWWWWW W.WWWW",
+    "WWWW.W         W.WWWW",
     "WWWW.W.WWWWWWW.W.WWWW",
     "W.........W.........W",
     "W.WW.WWWW.W.WWWW.WW.W",

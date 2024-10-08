@@ -21,11 +21,18 @@ pellets = pygame.sprite.Group()
 
 pellet_count = 0
 
+def count_total_pellets():
+    total_pellets = 0
+    for row in tilemap:
+        total_pellets += row.count('.')  # Count pellets represented by '.'
+    return total_pellets
+
 # Initialize game elements
 def init_game():
     global player, pellet_count
 
-    pellet_count = 0
+    pellet_count = count_total_pellets()  # Get the total pellet count
+    print(f"Total pellets: {pellet_count}")  # Print total for verification
 
     for row_index, row in enumerate(tilemap):
         for col_index, tile in enumerate(row):
@@ -36,10 +43,12 @@ def init_game():
             elif tile == 'E':
                 enemy = Enemy(game, col_index, row_index)  # Ghost Enemy
             elif tile == '.':
-                Pellet(game, col_index, row_index)  # Pellets
-                pellet_count += 1
+                pellet = Pellet(game, col_index, row_index)  # Pellets
+                pellets.add
+                # No need to increment pellet_count here
             elif tile == ' ':
-                Ground(game, col_index, row_index) # ground
+                Ground(game, col_index, row_index)  # Ground
+
 
 # Main game loop
 def game_loop():
@@ -82,9 +91,10 @@ def game_loop():
         collected_pellets = pygame.sprite.spritecollide(player, pellets, True)
         if collected_pellets:
             pellet_count -= len(collected_pellets)  # Decrease pellet count
+            print(f"Collected pellets: {len(collected_pellets)}, Remaining pellets: {pellet_count}")
 
         # Check if all pellets have been collected
-        if pellet_count == 0:
+        if pellet_count <= 0:
             print("You collected all the pellets! You win!")
             pygame.quit()
             sys.exit()

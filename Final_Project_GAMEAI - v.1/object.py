@@ -153,6 +153,27 @@ class Enemy(pygame.sprite.Sprite):
                     paths[(new_x, new_y)] = paths[current] + [(new_x, new_y)]
 
         return []
+    
+    def dfs(self, start, goal, tilemap):
+        stack = [(start, [])]  # Use a stack instead of a queue
+        visited = set()
+        visited.add(start)
+
+        while stack:
+            current, path = stack.pop()  # Get the current position and the path taken to reach it
+            if current == goal:
+                return path  # Return the path to the goal
+            
+            x, y = current
+            for dx, dy in [(0, 1), (1, 0), (0, -1), (-1, 0)]:  # Down, Right, Up, Left movements
+                new_x, new_y = x + dx, y + dy
+                new_pos = (new_x, new_y)
+                
+                if new_pos not in visited and self.can_move_to(new_x, new_y, tilemap):
+                    visited.add(new_pos)
+                    stack.append((new_pos, path + [new_pos]))  # Add the new position and updated path to the stack
+
+        return []  # Return empty path if no valid path is found
 
     def start_moving(self, next_tile):
         self.target_tile = next_tile  # Set the target tile

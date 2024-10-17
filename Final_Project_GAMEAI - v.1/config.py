@@ -42,3 +42,32 @@ tilemap = [
     "W...................W",
     "WWWWWWWWWWWWWWWWWWWWW",
 ]
+
+
+# tilemap = [
+#     "WWWWWWWWWWWWWWWWWWWWWWWWW",
+#     "W...........W...........W",
+#     "W..WW..WW...W...WW..WW..W",
+#     "W.......................W",
+#     "W..WW.W..WWWWWWW..W.WW..W",
+#     "W.....W.....W.....W.....W",
+#     "WWWW..WWW   W   WWW..WWWW",
+#     "WWWW..W           W..WWWW",
+#     "WWWW..W WWWW WWWW W..WWWW",
+#     "TP....  WE     EW  .....T",
+#     "WWWW..W WE     EW W..WWWW",
+#     "WWWW..W WWWWWWWWW W..WWWW",
+#     "WWWW..W           W..WWWW",
+#     "W........WWWWWWW........W",
+#     "W...W..WW...W..WWW..W..W",
+#     "W..WW...............WW..W",
+#     "W..W..W..WWWWWWW..W..W..W",
+#     "W.....W.....W.....W.....W",
+#     "W..WWWWWW...W...WWWWWW..W",
+#     "W.......................W",
+#     "W.......................W",
+#     "W.......................W",
+#     "W.......................W",
+#     "W.......................W",
+#     "WWWWWWWWWWWWWWWWWWWWWWWWW",
+# ]

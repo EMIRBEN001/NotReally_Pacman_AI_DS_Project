@@ -164,8 +164,8 @@ def game_loop():
             # Calculate a new path towards the player's current tile every frame or periodically
             goal_tile = (player.rect.x // TILESIZE, player.rect.y // TILESIZE)  # Update goal to player's current tile
             if not enemy.path:  # If no current path, calculate a new one
-                enemy.path = enemy.bfs((enemy.rect.x // TILESIZE, enemy.rect.y // TILESIZE), goal_tile, tilemap)
-                # enemy.path = enemy.dfs((enemy.rect.x // TILESIZE, enemy.rect.y // TILESIZE), goal_tile, tilemap)
+                # enemy.path = enemy.bfs((enemy.rect.x // TILESIZE, enemy.rect.y // TILESIZE), goal_tile, tilemap)
+                enemy.path = enemy.dfs((enemy.rect.x // TILESIZE, enemy.rect.y // TILESIZE), goal_tile, tilemap)
                 print(f"Enemy new path: {enemy.path}")
             enemy.move()  # Execute movement along the path
         

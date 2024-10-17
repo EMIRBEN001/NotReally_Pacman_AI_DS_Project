@@ -12,6 +12,9 @@ GROUND_LAYER = 1
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 BLUE = (0, 0, 255)
+GREEN = (0, 255, 0)
+YELLOW = (255, 255, 0)
+RED = (255, 0, 0)
 
 #Tilemap
 TILESIZE = 30  # Tile size for the map
@@ -26,7 +29,7 @@ tilemap = [
     "WWWW.WWW..W..WWW.WWWW",
     "WWWW.W         W.WWWW",
     "WWWW.W WWW WWW W.WWWW",
-    "TP.... WEE EEW .... T",
+    "TP.... W  E  W .... T",
     "WWWW.W WWWWWWW W.WWWW",
     "WWWW.W         W.WWWW",
     "WWWW.W.WWWWWWW.W.WWWW",

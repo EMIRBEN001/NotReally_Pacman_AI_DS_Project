@@ -29,7 +29,7 @@ tilemap = [
     "WWWW.WWW..W..WWW.WWWW",
     "WWWW.W         W.WWWW",
     "WWWW.W WWW WWW W.WWWW",
-    "TP.... W  E  W .... T",
+    "TP.... W R L W .... T",
     "WWWW.W WWWWWWW W.WWWW",
     "WWWW.W         W.WWWW",
     "WWWW.W.WWWWWWW.W.WWWW",
@@ -44,7 +44,7 @@ tilemap = [
 ]
 
 
-# tilemap = [
+# tilemap = [ THIS ONE ISNT USED AT ALL I'ts just a def testing shit idk v:
 #     "WWWWWWWWWWWWWWWWWWWWWWWWW",
 #     "W...........W...........W",
 #     "W..WW..WW...W...WW..WW..W",

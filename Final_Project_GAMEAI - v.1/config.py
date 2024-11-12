@@ -1,12 +1,13 @@
 # Constants
 SCREEN_WIDTH = 900
 SCREEN_HEIGHT = 900
-FPS = 45
+FPS = 60
 PLAYER_SPEED = 5
 PLAYER_LAYER = 4
 ENEMY_LAYER = 3
-BLOCK_LAYER = 2
+BLOCK_LAYER = 3
 GROUND_LAYER = 1
+SCARED_DURATION = 1000
 
 # Colors
 WHITE = (255, 255, 255)
@@ -21,15 +22,15 @@ TILESIZE = 30  # Tile size for the map
 
 tilemap = [
     "WWWWWWWWWWWWWWWWWWWWW",
-    "W.........W.........W",
-    "W.WW.WW...W...WW.WW.W",
+    "W........WWW........W",
+    "W.WW.WW..WWW..WW.WW.W",
     "W...................W",
     "W.WW.W.WWWWWWW.W.WW.W",
     "W....W....W....W....W",
     "WWWW.WWW..W..WWW.WWWW",
     "WWWW.W         W.WWWW",
     "WWWW.W WWW WWW W.WWWW",
-    "TP.... W R L W .... T",
+    "TP.... WIR LCW .... T",
     "WWWW.W WWWWWWW W.WWWW",
     "WWWW.W         W.WWWW",
     "WWWW.W.WWWWWWW.W.WWWW",
@@ -38,36 +39,7 @@ tilemap = [
     "W..W.............W..W",
     "W..W.W.WWWWWWW.W.W.WW",
     "W....W....W....W....W",
-    "W.WWWWWW..W..WWWWWW.W",
+    "W.WWWWWWW.W.WWWWWWW.W",
     "W...................W",
     "WWWWWWWWWWWWWWWWWWWWW",
 ]
-
-
-# tilemap = [ THIS ONE ISNT USED AT ALL I'ts just a def testing shit idk v:
-#     "WWWWWWWWWWWWWWWWWWWWWWWWW",
-#     "W...........W...........W",
-#     "W..WW..WW...W...WW..WW..W",
-#     "W.......................W",
-#     "W..WW.W..WWWWWWW..W.WW..W",
-#     "W.....W.....W.....W.....W",
-#     "WWWW..WWW   W   WWW..WWWW",
-#     "WWWW..W           W..WWWW",
-#     "WWWW..W WWWW WWWW W..WWWW",
-#     "TP....  WE     EW  .....T",
-#     "WWWW..W WE     EW W..WWWW",
-#     "WWWW..W WWWWWWWWW W..WWWW",
-#     "WWWW..W           W..WWWW",
-#     "W........WWWWWWW........W",
-#     "W...W..WW...W..WWW..W..W",
-#     "W..WW...............WW..W",
-#     "W..W..W..WWWWWWW..W..W..W",
-#     "W.....W.....W.....W.....W",
-#     "W..WWWWWW...W...WWWWWW..W",
-#     "W.......................W",
-#     "W.......................W",
-#     "W.......................W",
-#     "W.......................W",
-#     "W.......................W",
-#     "WWWWWWWWWWWWWWWWWWWWWWWWW",
-# ]

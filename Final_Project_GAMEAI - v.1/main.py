@@ -56,13 +56,13 @@ class Game:
                 elif tile == 'R':
                     self.blinky = Blinky(self, col_index, row_index)  # Red Ghost Enemy
                     self.enemies.add(self.blinky)
-                elif tile == 'L':
+                elif tile == 'L' and self.difficulty in ['medium' ,'hard', 'very_hard']:
                     self.pinky = Pinky(self, col_index, row_index)  # Pink Ghost Enemy
                     self.enemies.add(self.pinky)
-                elif tile == 'I':
-                    self.inky = Inky(self, col_index, row_index)  # Pink Ghost Enemy
+                elif tile == 'I' and self.difficulty in ['hard', 'very_hard']:
+                    self.inky = Inky(self, col_index, row_index)  # Cyan Ghost Enemy
                     self.enemies.add(self.inky)
-                elif tile == 'C':
+                elif tile == 'C' and self.difficulty == 'very_hard':
                     self.clyde = Clyde(self, col_index, row_index)  # Orange Ghost Enemy
                     self.enemies.add(self.clyde)
                 elif tile == '.':
@@ -82,24 +82,72 @@ class Game:
         surface.blit(text_obj, text_rect)
 
         
-    # Intro Screen
+    # Intro Screen with Difficulty Options
     def intro_screen(self):
         font = pygame.font.Font(None, 74)
+        message_font = pygame.font.Font(None, 50)
+        button_font = pygame.font.Font(None, 36)
+        
+        # Create buttons for Easy and Hard modes
+        easy_button = Button(SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 + 50, 200, 50, 'Easy', button_font, GREEN, BLACK)
+        medium_button = Button(SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 + 120, 200, 50, 'Medium', button_font, YELLOW, BLACK)
+        hard_button = Button(SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 + 190, 200, 50, 'Hard', button_font, RED, BLACK)
+        very_hard_button = Button(SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 + 260, 200, 50, 'Very Hard', button_font, DARK_RED, BLACK)
+        
         while True:
             self.screen.fill(BLACK)
-            self.draw_text("PAC-MAN", font, YELLOW, self.screen, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50)
-            self.draw_text("Press ENTER to Start", font, WHITE, self.screen, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50)
+            
+            # Draw game title
+            self.draw_text("PACK-GUY", font, YELLOW, self.screen, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 100)
+            self.draw_text("Please choose the difficulty of the game!",message_font, WHITE, self.screen, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50)
 
+            # Draw difficulty selection buttons
+            easy_button.draw(self.screen)
+            hard_button.draw(self.screen)
+            medium_button.draw(self.screen)
+            very_hard_button.draw(self.screen)
+            
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
+
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 1:  # Left click
+                        if easy_button.is_clicked(event.pos):
+                            self.difficulty = 'easy'  # Set difficulty to easy
+                            return 'intro'  # Proceed to game
+                        elif medium_button.is_clicked(event.pos):
+                            self.difficulty = 'medium'  # Set difficulty to medium
+                            return 'intro'  # Proceed to game
+                        elif hard_button.is_clicked(event.pos):
+                            self.difficulty = 'hard'  # Set difficulty to hard
+                            return 'intro'  # Proceed to game
+                        elif very_hard_button.is_clicked(event.pos):
+                            self.difficulty = 'very_hard'  # Set difficulty to very hard
+                            return 'intro'  # Proceed to game
+                        
                 if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_RETURN:
-                        return  # Exit the intro screen and start the game
+                        if event.key == pygame.K_1:
+                            print("Easy selected with Click + 1!")
+                            self.difficulty = 'easy'
+                            return 'intro'
+                        elif event.key == pygame.K_2:
+                            print("Medium selected with Click + 2!")
+                            self.difficulty = 'medium'
+                            return 'intro'
+                        elif event.key == pygame.K_3: 
+                            print("Hard selected with Click + 3!")
+                            self.difficulty = 'hard'
+                            return 'intro'
+                        elif event.key == pygame.K_4:
+                            print("Very Hard selected with Click + 4!")
+                            self.difficulty = 'very_hard'
+                            return 'intro'
 
             pygame.display.flip()
             self.clock.tick(60)
+
 
     # Game Over Screen
     def game_over_screen(self, status, final_score, elapsed_time):
@@ -154,15 +202,28 @@ class Game:
     def game_loop(self):
         self.init_game()
         self.start_time = time.time()  # Record the start time
-        goal_tile = (self.player.rect.x // TILESIZE, self.player.rect.y // TILESIZE)
 
-        collision_delay = 1
+        # Define the back button rectangle
+        back_button = pygame.Rect(10, SCREEN_HEIGHT - 60, 100, 40)
 
         while True:
+            self.screen.fill(BLACK)
+            self.all_sprites.update()  # Update all sprites
+            
+            self.all_sprites.draw(self.screen)  # Draw all sprites
+            self.draw_text(f"Score: {self.score}", pygame.font.Font(None, 36), WHITE, self.screen, SCREEN_WIDTH // 2, 20)
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 1 and back_button.collidepoint(event.pos):
+                        return False # Exit the game loop and return to intro screen
+                    
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_BACKSPACE:
+                    return False
+                    
 
             keys = pygame.key.get_pressed()
             if self.player and not self.player.moving:
@@ -175,53 +236,15 @@ class Game:
                 if keys[pygame.K_DOWN]:
                     self.player.move(0, 1)
 
-            # Blinky (Red Ghost) Move Logic
-            if not self.blinky.path:
-                goal_tile = (self.player.rect.x // TILESIZE, self.player.rect.y // TILESIZE)
-                self.blinky.path = self.blinky.bfs((self.blinky.rect.x // TILESIZE, self.blinky.rect.y // TILESIZE), goal_tile, tilemap)
-            self.blinky.move()
-
-            # Pinky (Pink Ghost) Move Logic
-            if not self.pinky.path:
-                print("Calculating path for Pinky...")
-                player_tile = (self.player.rect.x // TILESIZE, self.player.rect.y // TILESIZE)
-                radius = 4
-                offset_x = radius if self.player.direction[0] >= 0 else -radius
-                offset_y = radius if self.player.direction[1] >= 0 else -radius
-                pinky_goal_tile = (player_tile[0] + offset_x, player_tile[1] + offset_y)
-                pinky_goal_tile = (
-                    max(0, min(len(tilemap[0]) - 1, pinky_goal_tile[0])), 
-                    max(0, min(len(tilemap) - 1, pinky_goal_tile[1]))
-                )
-                self.pinky.path = self.pinky.bfs((self.pinky.rect.x // TILESIZE, self.pinky.rect.y // TILESIZE), pinky_goal_tile, tilemap)
-            self.pinky.move()
-
-            # Inky (Cyan Ghost) Move Logic
-            if not self.inky.path:
-                print("Calculating path for Pinky...")
-                player_tile = (self.player.rect.x // TILESIZE, self.player.rect.y // TILESIZE)
-                radius = 2
-                offset_x = radius if self.player.direction[0] >= 0 else -radius
-                offset_y = radius if self.player.direction[1] >= 0 else -radius
-                inky_goal_tile = (player_tile[0] + offset_x, player_tile[1] + offset_y)
-                inky_goal_tile = (
-                    max(0, min(len(tilemap[0]) - 1, inky_goal_tile[0])), 
-                    max(0, min(len(tilemap) - 1, inky_goal_tile[1]))
-                )
-                self.inky.path = self.inky.dfs((self.inky.rect.x // TILESIZE, self.inky.rect.y // TILESIZE), inky_goal_tile, tilemap)
-            self.inky.move()
-
-            # Clyde (Orange Ghost) Move Logic
-            if not self.clyde.path:
-                goal_tile = (self.player.rect.x // TILESIZE, self.player.rect.y // TILESIZE)
-                start_tile = (self.clyde.rect.x // TILESIZE, self.clyde.rect.y // TILESIZE)
-                self.clyde.path = self.clyde.dfs(start_tile, goal_tile, tilemap)
-            self.clyde.move()
-
-            # If Clyde encounters a wall during movement, clear his path to trigger a recalculation
-            current_tile = (self.clyde.rect.x // TILESIZE, self.clyde.rect.y // TILESIZE)
-            if tilemap[current_tile[1]][current_tile[0]] == 'W':
-                self.clyde.path = []
+            # Call each enemy's move method if they exist
+            if hasattr(self, 'blinky'):  # Check if Blinky exists
+                self.blinky.move()
+            if hasattr(self, 'pinky'):  # Check if Pinky exists (only in Hard mode)
+                self.pinky.move()
+            if hasattr(self, 'inky'):  # Check if Inky exists (only in Hard mode)
+                self.inky.move()
+            if hasattr(self, 'clyde'):  # Check if Clyde exists (only in Hard mode)
+                self.clyde.move()
 
              # Calculate elapsed time for the timer
             elapsed_time = int(time.time() - self.start_time)
@@ -245,9 +268,11 @@ class Game:
             # Display the score on the screen
             font = pygame.font.Font(None, 36)
             self.draw_text(f"Score: {self.score}", font, WHITE, self.screen, SCREEN_WIDTH - 100, 30)
-           
-            # Display the timer below the score
             self.draw_text(timer_text, font, WHITE, self.screen, SCREEN_WIDTH - 100, 60)
+
+             # Draw the back button
+            pygame.draw.rect(self.screen, WHITE, back_button)
+            self.draw_text("Back", font, BLACK, self.screen, back_button.centerx, back_button.centery)
 
             if self.pellet_count <= 0:
                 elapsed_time = time.time() - self.start_time  # Calculate elapsed time
@@ -258,7 +283,7 @@ class Game:
                 elapsed_time = time.time() - self.start_time  # Calculate elapsed time
                 current_time = time.time()
                 # technically IFrames
-                if current_time - self.last_collision_time >= self.collision_cooldown_duration:
+                if current_time - self.last_collision_time >=  self.collision_cooldown_duration:
                     self.score -= 500  # Deduct points on collision
                     self.last_collision_time = current_time  # Update last collision time
 
@@ -266,9 +291,10 @@ class Game:
             self.clock.tick(60)
 
 
-# Run the game
 if __name__ == "__main__":
     game = Game()
-    game.intro_screen()
-    while game.game_loop():
-        game.init_game()
+    while True:
+        result = game.intro_screen()
+        if result == 'intro':  # You can check this label to perform actions if needed
+            if game.game_loop():
+                game.init_game()

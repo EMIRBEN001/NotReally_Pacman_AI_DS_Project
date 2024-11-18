@@ -170,7 +170,7 @@ class Game:
                 time_text = f"Time: {minutes}m {seconds}s"
                 self.draw_text(time_text, score_font, WHITE, self.screen, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50)
             
-            elif status == 'lose':
+            elif status == 'lose': # this is unused by the way
                 self.draw_text("GAME OVER", font, RED, self.screen, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50)
                 self.draw_text(f"Final Score: {final_score}", score_font, WHITE, self.screen, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
                 minutes, seconds = divmod(int(elapsed_time), 60)
@@ -224,16 +224,16 @@ class Game:
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_BACKSPACE:
                     return False
                     
-
+            # this is basically the manual movement for the pacman
             keys = pygame.key.get_pressed()
             if self.player and not self.player.moving:
-                if keys[pygame.K_LEFT]:
+                if keys[pygame.K_LEFT]: #left arrow
                     self.player.move(-1, 0)
-                if keys[pygame.K_RIGHT]:
+                if keys[pygame.K_RIGHT]: #right arrow
                     self.player.move(1, 0)
-                if keys[pygame.K_UP]:
+                if keys[pygame.K_UP]: # up arrow
                     self.player.move(0, -1)
-                if keys[pygame.K_DOWN]:
+                if keys[pygame.K_DOWN]: #down arrow
                     self.player.move(0, 1)
 
             # Call each enemy's move method if they exist
@@ -245,6 +245,9 @@ class Game:
                 self.inky.move()
             if hasattr(self, 'clyde'):  # Check if Clyde exists (only in Hard mode)
                 self.clyde.move()
+
+            # in future self playing AI for pacman put it in here like for example
+            # self.player.move()
 
              # Calculate elapsed time for the timer
             elapsed_time = int(time.time() - self.start_time)

@@ -1,6 +1,7 @@
 # main.py
 import pygame
 from config import *
+from config import TilemapManager
 from object import *
 import sys
 import time
@@ -23,11 +24,20 @@ class Game:
         self.blocks = pygame.sprite.Group()
         self.pellets = pygame.sprite.Group()
 
+        self.levels = 0
+        self.current_level = 1
         self.pellet_count = 0
         self.score = 0
         self.start_time = time.time()
+        self.total_elapsed_time = 0
         self.collision_cooldown_duration = 1.0  # 1 second cooldown
         self.last_collision_time = 0  # Last time a collision occurred
+
+    def reset_tilemap(self):
+        """Restore the tilemap to its original state."""
+        global tilemap
+        tilemap = [list(row) for row in original_tilemap]
+        TilemapManager.tilemap = tilemap
 
     def count_total_pellets(self):
         total_pellets = 0
@@ -37,6 +47,7 @@ class Game:
 
     # Initialize game elements
     def init_game(self):
+        self.reset_tilemap()
         self.all_sprites.empty()
         self.enemies.empty()
         self.blocks.empty()
@@ -75,6 +86,15 @@ class Game:
         self.all_sprites.add(self.blocks)
         self.all_sprites.add(self.pellets)
 
+    # Display a new level message
+    def new_level_screen(self):
+        font = pygame.font.Font(None, 74)
+        self.screen.fill(BLACK)
+        self.draw_text(f"Level {self.current_level}", font, YELLOW, self.screen, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
+        pygame.display.flip()
+        pygame.time.wait(2000)  # Pause for 2 seconds before starting the level
+
+
     def draw_text(self, text, font, color, surface, x, y):
         """Helper function to draw text on screen."""
         text_obj = font.render(text, True, color)
@@ -82,12 +102,18 @@ class Game:
         surface.blit(text_obj, text_rect)
 
         
-    # Intro Screen with Difficulty Options
     def intro_screen(self):
         font = pygame.font.Font(None, 74)
         message_font = pygame.font.Font(None, 50)
         button_font = pygame.font.Font(None, 36)
+        input_font = pygame.font.Font(None, 36)
         
+        # Input field setup
+        input_box = pygame.Rect(SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 + 320, 200, 40)
+        input_text = ''
+        input_active = False
+        placeholder_text = "Enter levels"
+
         # Create buttons for Easy and Hard modes
         easy_button = Button(SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 + 50, 200, 50, 'Easy', button_font, GREEN, BLACK)
         medium_button = Button(SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 + 120, 200, 50, 'Medium', button_font, YELLOW, BLACK)
@@ -97,15 +123,25 @@ class Game:
         while True:
             self.screen.fill(BLACK)
             
-            # Draw game title
+            # Draw game title and instructions
             self.draw_text("PACK-GUY", font, YELLOW, self.screen, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 100)
-            self.draw_text("Please choose the difficulty of the game!",message_font, WHITE, self.screen, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50)
+            self.draw_text("Please choose the difficulty of the game!", message_font, WHITE, self.screen, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50)
 
             # Draw difficulty selection buttons
             easy_button.draw(self.screen)
             hard_button.draw(self.screen)
             medium_button.draw(self.screen)
             very_hard_button.draw(self.screen)
+
+            # Draw the input box
+            pygame.draw.rect(self.screen, WHITE, input_box, 2 if input_active else 1)
+            if input_text:
+                # Display user-entered text
+                input_surface = input_font.render(input_text, True, WHITE)
+            else:
+                # Display placeholder text
+                input_surface = input_font.render(placeholder_text, True, GRAY)
+            self.screen.blit(input_surface, (input_box.x + 5, input_box.y + 5))
             
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -113,41 +149,61 @@ class Game:
                     sys.exit()
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
+                    # Check if the input box is clicked
+                    if input_box.collidepoint(event.pos):
+                        input_active = True  # Activate input box
+                    else:
+                        input_active = False  # Deactivate input box
+                    
+                    # Handle button clicks for difficulty
                     if event.button == 1:  # Left click
                         if easy_button.is_clicked(event.pos):
-                            self.difficulty = 'easy'  # Set difficulty to easy
-                            return 'intro'  # Proceed to game
+                            self.difficulty = 'easy'
+                            return 'intro'
                         elif medium_button.is_clicked(event.pos):
-                            self.difficulty = 'medium'  # Set difficulty to medium
-                            return 'intro'  # Proceed to game
+                            self.difficulty = 'medium'
+                            return 'intro'
                         elif hard_button.is_clicked(event.pos):
-                            self.difficulty = 'hard'  # Set difficulty to hard
-                            return 'intro'  # Proceed to game
+                            self.difficulty = 'hard'
+                            return 'intro'
                         elif very_hard_button.is_clicked(event.pos):
-                            self.difficulty = 'very_hard'  # Set difficulty to very hard
-                            return 'intro'  # Proceed to game
-                        
+                            self.difficulty = 'very_hard'
+                            return 'intro'
+
                 if event.type == pygame.KEYDOWN:
+                    # Handle text input when input box is active
+                    if input_active:
+                        if event.key == pygame.K_RETURN:
+                            try:
+                                # Set the number of levels from input text
+                                self.levels = max(1, int(input_text))  # Ensure at least 1 level
+                                print(f"Number of levels set to: {self.levels}")
+                            except ValueError:
+                                print("Invalid level input, defaulting to 5 levels.")
+                                self.levels = 5  # Default fallback
+                            input_active = False
+                            input_text = ''  # Clear input after submission
+                        elif event.key == pygame.K_BACKSPACE:
+                            input_text = input_text[:-1]  # Remove last character
+                        else:
+                            input_text += event.unicode  # Add new character to input text
+                    else:
+                        # Handle hotkeys only when input box is not active
                         if event.key == pygame.K_1:
-                            print("Easy selected with Click + 1!")
                             self.difficulty = 'easy'
                             return 'intro'
                         elif event.key == pygame.K_2:
-                            print("Medium selected with Click + 2!")
                             self.difficulty = 'medium'
                             return 'intro'
-                        elif event.key == pygame.K_3: 
-                            print("Hard selected with Click + 3!")
+                        elif event.key == pygame.K_3:
                             self.difficulty = 'hard'
                             return 'intro'
                         elif event.key == pygame.K_4:
-                            print("Very Hard selected with Click + 4!")
                             self.difficulty = 'very_hard'
                             return 'intro'
 
             pygame.display.flip()
             self.clock.tick(60)
-
 
     # Game Over Screen
     def game_over_screen(self, status, final_score, elapsed_time):
@@ -167,14 +223,7 @@ class Game:
                 self.draw_text(f"Final Score: {final_score}", score_font, WHITE, self.screen, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
                 # Display the final time in seconds
                 minutes, seconds = divmod(int(elapsed_time), 60)
-                time_text = f"Time: {minutes}m {seconds}s"
-                self.draw_text(time_text, score_font, WHITE, self.screen, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50)
-            
-            elif status == 'lose': # this is unused by the way
-                self.draw_text("GAME OVER", font, RED, self.screen, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50)
-                self.draw_text(f"Final Score: {final_score}", score_font, WHITE, self.screen, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
-                minutes, seconds = divmod(int(elapsed_time), 60)
-                time_text = f"Time: {minutes}m {seconds}s"
+                time_text = f"Total Time: {minutes}m {seconds}s"
                 self.draw_text(time_text, score_font, WHITE, self.screen, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50)
             
             # Draw retry button
@@ -195,104 +244,113 @@ class Game:
                     return 'retry'
 
             pygame.display.flip()
-            self.clock.tick(60)
+            self.clock.tick(60)  # Limit to 60 frames per second
+
 
 
     # Main game loop
     def game_loop(self):
         self.init_game()
         self.start_time = time.time()  # Record the start time
-
-        # Define the back button rectangle
+        self.current_level = 1
         back_button = pygame.Rect(10, SCREEN_HEIGHT - 60, 100, 40)
 
-        while True:
-            self.screen.fill(BLACK)
-            self.all_sprites.update()  # Update all sprites
-            
-            self.all_sprites.draw(self.screen)  # Draw all sprites
-            self.draw_text(f"Score: {self.score}", pygame.font.Font(None, 36), WHITE, self.screen, SCREEN_WIDTH // 2, 20)
+        while self.current_level <= self.levels:
+            self.new_level_screen()
+            self.init_game()
 
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    if event.button == 1 and back_button.collidepoint(event.pos):
-                        return False # Exit the game loop and return to intro screen
-                    
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_BACKSPACE:
-                    return False
-                    
-            # this is basically the manual movement for the pacman
-            keys = pygame.key.get_pressed()
-            if self.player and not self.player.moving:
-                if keys[pygame.K_LEFT]: #left arrow
-                    self.player.move(-1, 0)
-                if keys[pygame.K_RIGHT]: #right arrow
-                    self.player.move(1, 0)
-                if keys[pygame.K_UP]: # up arrow
-                    self.player.move(0, -1)
-                if keys[pygame.K_DOWN]: #down arrow
-                    self.player.move(0, 1)
+            level_start_time = time.time()
 
-            # Call each enemy's move method if they exist
-            if hasattr(self, 'blinky'):  # Check if Blinky exists
-                self.blinky.move()
-            if hasattr(self, 'pinky'):  # Check if Pinky exists (only in Hard mode)
-                self.pinky.move()
-            if hasattr(self, 'inky'):  # Check if Inky exists (only in Hard mode)
-                self.inky.move()
-            if hasattr(self, 'clyde'):  # Check if Clyde exists (only in Hard mode)
-                self.clyde.move()
+            while True:
+                self.screen.fill(BLACK)
+                self.all_sprites.update()  # Update all sprites
+                self.all_sprites.draw(self.screen)  # Draw all sprites
 
-            # in future self playing AI for pacman put it in here like for example
-            # self.player.move()
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        sys.exit()
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        if event.button == 1 and back_button.collidepoint(event.pos):
+                            return False # Exit the game loop and return to intro screen    
+                    if event.type == pygame.KEYDOWN and event.key == pygame.K_BACKSPACE:
+                        return False
 
-             # Calculate elapsed time for the timer
-            elapsed_time = int(time.time() - self.start_time)
-            hours = elapsed_time // 3600
-            minutes = (elapsed_time % 3600) // 60
-            seconds = elapsed_time % 60
-            timer_text = f"Time: {hours:02}:{minutes:02}:{seconds:02}"
+                # Handle player movement MANUALLY
+                keys = pygame.key.get_pressed()
+                if self.player and not self.player.moving:
+                    if keys[pygame.K_LEFT]:
+                        self.player.move(-1, 0)
+                    if keys[pygame.K_RIGHT]:
+                        self.player.move(1, 0)
+                    if keys[pygame.K_UP]:
+                        self.player.move(0, -1)
+                    if keys[pygame.K_DOWN]:
+                        self.player.move(0, 1)
 
-            self.all_sprites.update()
-            self.screen.fill(BLACK)
-            self.all_sprites.draw(self.screen)
+                # Call each enemy's move method
+                if hasattr(self, 'blinky'):
+                    self.blinky.move()
+                if hasattr(self, 'pinky'):
+                    self.pinky.move()
+                if hasattr(self, 'inky'):
+                    self.inky.move()
+                if hasattr(self, 'clyde'):
+                    self.clyde.move()
 
-            # Update score and pellet count
-            collected_pellets = pygame.sprite.spritecollide(self.player, self.pellets, True)
-            if collected_pellets:
-                self.pellet_count -= len(collected_pellets)
-                self.score += len(collected_pellets) * 100  # Add collected pellets to score
-                print(f"Collected pellets: {len(collected_pellets)}, Remaining pellets: {self.pellet_count}")
-                print(f"Score: {self.score}")
 
-            # Display the score on the screen
-            font = pygame.font.Font(None, 36)
-            self.draw_text(f"Score: {self.score}", font, WHITE, self.screen, SCREEN_WIDTH - 100, 30)
-            self.draw_text(timer_text, font, WHITE, self.screen, SCREEN_WIDTH - 100, 60)
+                # Calculate elapsed time for the timer
+                elapsed_time = int(time.time() - self.start_time)
+                hours = elapsed_time // 3600
+                minutes = (elapsed_time % 3600) // 60
+                seconds = elapsed_time % 60
+                timer_text = f"Time: {hours:02}:{minutes:02}:{seconds:02}"
 
-             # Draw the back button
-            pygame.draw.rect(self.screen, WHITE, back_button)
-            self.draw_text("Back", font, BLACK, self.screen, back_button.centerx, back_button.centery)
+                # Update score and pellet count
+                collected_pellets = pygame.sprite.spritecollide(self.player, self.pellets, True)
+                if collected_pellets:
+                    self.pellet_count -= len(collected_pellets)
+                    self.score += len(collected_pellets) * 100  # Add collected pellets to score
+                    # print(f"Collected pellets: {len(collected_pellets)}, Remaining pellets: {self.pellet_count}")
+                    # print(f"Score: {self.score}")
 
-            if self.pellet_count <= 0:
-                elapsed_time = time.time() - self.start_time  # Calculate elapsed time
-                result = self.game_over_screen('win', self.score, elapsed_time)
-                return result == 'retry'
+                # Display the score on the screen
+                font = pygame.font.Font(None, 36)
+                self.draw_text(f"Score: {self.score}", font, WHITE, self.screen, SCREEN_WIDTH - 100, 30)
+                self.draw_text(timer_text, font, WHITE, self.screen, SCREEN_WIDTH - 100, 60)
 
-            if pygame.sprite.spritecollideany(self.player, self.enemies):
-                elapsed_time = time.time() - self.start_time  # Calculate elapsed time
-                current_time = time.time()
-                # technically IFrames
-                if current_time - self.last_collision_time >=  self.collision_cooldown_duration:
-                    self.score -= 500  # Deduct points on collision
-                    self.last_collision_time = current_time  # Update last collision time
+                # Draw the back button
+                pygame.draw.rect(self.screen, WHITE, back_button)
+                self.draw_text("Back", font, BLACK, self.screen, back_button.centerx, back_button.centery)
 
-            pygame.display.flip()
-            self.clock.tick(60)
+                # Handling collisions with enemies
+                if pygame.sprite.spritecollideany(self.player, self.enemies):
+                    elapsed_time = time.time() - self.start_time  # Calculate elapsed time
+                    current_time = time.time()
+                    # technically IFrames
+                    if current_time - self.last_collision_time >=  self.collision_cooldown_duration:
+                        self.score -= 500  # Deduct points on collision
+                        self.last_collision_time = current_time  # Update last collision time
 
+                # Check if level is completed
+                if self.pellet_count <= 0:
+                    # Calculate elapsed time for the level
+                    level_elapsed_time = time.time() - level_start_time
+                    self.total_elapsed_time += level_elapsed_time  # Add to total time
+
+                    print(f"Level {self.current_level} completed in {level_elapsed_time:.2f} seconds with {self.score}.")
+                    self.current_level += 1
+
+                    break  # Move to the next level
+
+                pygame.display.flip()
+                self.clock.tick(FPS)
+
+            # Calculate final elapsed time
+        final_elapsed_time = self.total_elapsed_time
+
+        # Game over screen
+        self.game_over_screen('win', self.score, final_elapsed_time)
 
 if __name__ == "__main__":
     game = Game()

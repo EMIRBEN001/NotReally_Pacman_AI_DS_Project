@@ -8,6 +8,10 @@ or really this is just a pathfinding algorithm with more personality i guess if 
 How to run the program?, main.py
 
 when you installed the zip of this file, make sure that you run the folder of the Final_Project_GAMEAI_V.1 folder
+like this i meant
+
+![image](https://github.com/user-attachments/assets/5d4626ee-e691-417e-92b2-3443a5535a7d)
+
 
 ![image](https://github.com/user-attachments/assets/acbb73f4-683d-49bf-b12b-103af42dd2a0)
 

@@ -58,14 +58,18 @@ class Player(pygame.sprite.Sprite):
 
           
     def eat_pellet(self):
-        pass
+        if tilemap[self.tile_y][self.tile_x] == '.':
+            tilemap[self.tile_y][self.tile_x] = ' '  # Replace pellet with empty space
+            self.collected_pellets += 1
+            self.score += 10  # Increment score
+            print(f"Pellet eaten at ({self.tile_x}, {self.tile_y}). Total pellets: {self.collected_pellets}")
 
     def teleport(self):
         # Teleport logic: Move to the corresponding teleporter
-        if (self.tile_x, self.tile_y) == (20, 9):  # Right teleporter
-            self.tile_x, self.tile_y = 0, 9  # Move to left teleporter
-        elif (self.tile_x, self.tile_y) == (0, 9):  # Left teleporter
-            self.tile_x, self.tile_y = 20, 9  # Move to right teleporter
+        if (self.tile_x, self.tile_y) == (19, 9):  # Right teleporter
+            self.tile_x, self.tile_y = 1, 9  # Move to left teleporter
+        elif (self.tile_x, self.tile_y) == (1, 9):  # Left teleporter
+            self.tile_x, self.tile_y = 19, 9  # Move to right teleporter
 
         # Update the rect position immediately to the new tile position
         self.rect.topleft = (self.tile_x * TILESIZE, self.tile_y * TILESIZE)
@@ -506,9 +510,6 @@ class Ground(pygame.sprite.Sprite):
         self.image = pygame.Surface((TILESIZE, TILESIZE))
         self.image.fill(WHITE)  # Color for the ground
         self.rect = self.image.get_rect(topleft=(x * TILESIZE, y * TILESIZE))
-
-    def update(self):
-        pass  # No update needed for ground tiles
     
 class Button:
     def __init__(self, x, y, width, height, text, font, color, text_color):

@@ -27,7 +27,8 @@ class Game:
         self.levels = 0
         self.current_level = 1
         self.pellet_count = 0
-        self.score = 0
+        self.score = 0 # score for each level
+        self.total_score = 0 # score total from each game
         self.start_time = time.time()
         self.total_elapsed_time = 0
         self.collision_cooldown_duration = 1.0  # 1 second cooldown
@@ -205,6 +206,7 @@ class Game:
             pygame.display.flip()
             self.clock.tick(60)
 
+
     # Game Over Screen
     def game_over_screen(self, status, final_score, elapsed_time):
         font = pygame.font.Font(None, 74)
@@ -306,14 +308,6 @@ class Game:
                 seconds = elapsed_time % 60
                 timer_text = f"Time: {hours:02}:{minutes:02}:{seconds:02}"
 
-                # Update score and pellet count
-                collected_pellets = pygame.sprite.spritecollide(self.player, self.pellets, True)
-                if collected_pellets:
-                    self.pellet_count -= len(collected_pellets)
-                    self.score += len(collected_pellets) * 100  # Add collected pellets to score
-                    # print(f"Collected pellets: {len(collected_pellets)}, Remaining pellets: {self.pellet_count}")
-                    # print(f"Score: {self.score}")
-
                 # Display the score on the screen
                 font = pygame.font.Font(None, 36)
                 self.draw_text(f"Score: {self.score}", font, WHITE, self.screen, SCREEN_WIDTH - 100, 30)
@@ -332,12 +326,20 @@ class Game:
                         self.score -= 500  # Deduct points on collision
                         self.last_collision_time = current_time  # Update last collision time
 
+                # Update score and pellet count
+                collected_pellets = pygame.sprite.spritecollide(self.player, self.pellets, True)
+                if collected_pellets:
+                    self.pellet_count -= len(collected_pellets)
+                    self.score += len(collected_pellets) * 100  # Add collected pellets to score
+                    # print(f"Collected pellets: {len(collected_pellets)}, Remaining pellets: {self.pellet_count}")
+                    # print(f"Score: {self.score}")
+
                 # Check if level is completed
                 if self.pellet_count <= 0:
                     # Calculate elapsed time for the level
                     level_elapsed_time = time.time() - level_start_time
                     self.total_elapsed_time += level_elapsed_time  # Add to total time
-
+                    self.total_score += self.score
                     print(f"Level {self.current_level} completed in {level_elapsed_time:.2f} seconds with {self.score}.")
                     self.current_level += 1
 
@@ -350,7 +352,7 @@ class Game:
         final_elapsed_time = self.total_elapsed_time
 
         # Game over screen
-        self.game_over_screen('win', self.score, final_elapsed_time)
+        self.game_over_screen('win', self.total_score, final_elapsed_time)
 
 if __name__ == "__main__":
     game = Game()

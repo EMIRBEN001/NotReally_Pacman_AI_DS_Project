@@ -253,6 +253,7 @@ class Game:
     # Main game loop
     def game_loop(self):
         self.init_game()
+        self.total_score = 0
         self.start_time = time.time()  # Record the start time
         self.current_level = 1
         back_button = pygame.Rect(10, SCREEN_HEIGHT - 60, 100, 40)
@@ -331,19 +332,23 @@ class Game:
                 if collected_pellets:
                     self.pellet_count -= len(collected_pellets)
                     self.score += len(collected_pellets) * 100  # Add collected pellets to score
-                    # print(f"Collected pellets: {len(collected_pellets)}, Remaining pellets: {self.pellet_count}")
-                    # print(f"Score: {self.score}")
+                    print(f"Collected pellets: {len(collected_pellets)}, Remaining pellets: {self.pellet_count}")
+                    print(f"Level score: {self.score}")
 
                 # Check if level is completed
                 if self.pellet_count <= 0:
-                    # Calculate elapsed time for the level
+                    # After the level is completed, update the total score
+                    self.total_score += self.score  # Add level's score to total
+                    print(f"Total score after level {self.current_level}: {self.total_score}")
+                    self.score = 0  # Reset the level score for the next level
                     level_elapsed_time = time.time() - level_start_time
                     self.total_elapsed_time += level_elapsed_time  # Add to total time
-                    self.total_score += self.score
-                    print(f"Level {self.current_level} completed in {level_elapsed_time:.2f} seconds with {self.score}.")
+
+                    print(f"Level {self.current_level} completed in {level_elapsed_time:.2f} seconds.")
                     self.current_level += 1
 
                     break  # Move to the next level
+
 
                 pygame.display.flip()
                 self.clock.tick(FPS)

@@ -10,6 +10,8 @@ How to run the program?, main.py
 when you installed the zip of this file, make sure that you run the folder of the PACKMAN - V.2(GASTARADV) for example in folder
 like this i meant
 
+because initially the folder when you installed the zip is the name of this project folder(NotReally_Pacman_AI_DS_Project-main), and if you run the code in this project folder it will caused an error of the path for the assets
+
 ![image](https://github.com/user-attachments/assets/00d4c9ed-45b3-4063-a747-e841944a9b1d)
 
 
